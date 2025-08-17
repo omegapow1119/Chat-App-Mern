@@ -5,7 +5,7 @@ import http from 'http';
 import { connectDB } from './lib/db.js';
 import userRouter from './routes/userRoutes.js';
 import messageRouter from './routes/messageRoutes.js';
-import{Server} from 'socket.io';
+import { Server } from 'socket.io';
 
 //create express app  and HTTP server
 
@@ -13,7 +13,7 @@ const app = express();
 const server = http.createServer(app);//socket.io support http server
 
 // Initialize socket. io server
-export const io = new Server(server,{
+export const io = new Server(server, {
     cors: {
         origin: "*",
         // methods: ["GET", "POST"]
@@ -35,11 +35,11 @@ io.on("connection", (socket) => {
 
     //disconnect event
 
-   socket.on("disconnect", () => {
-       console.log("User Disconnected:", userId);
-       delete userSocketMap[userId];
-       io.emit("getOnlineUsers", Object.keys(userSocketMap));
-   });
+    socket.on("disconnect", () => {
+        console.log("User Disconnected:", userId);
+        delete userSocketMap[userId];
+        io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    });
 });
 
 //middleware
@@ -58,7 +58,12 @@ app.use("/api/messages", messageRouter);
 
 await connectDB();
 
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`Server is running on PORT: ${PORT}`);
-});
+if (process.env.NODE_ENV !== "production") {
+    const PORT = process.env.PORT || 5000;
+    server.listen(PORT, () => {
+        console.log(`Server is running on PORT: ${PORT}`);
+    });
+}
+
+//export server for vercel
+export default server;
